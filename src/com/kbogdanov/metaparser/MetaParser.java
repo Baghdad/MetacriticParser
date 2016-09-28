@@ -23,8 +23,9 @@ import java.util.List;
 public class MetaParser implements Parser {
     public void parse() {
         int num = 0;
-        List<String> games;
-        games = getGamesFromList(0);
+        //List<String> games;
+        //games = getGamesFromList(0);
+        getGameInfo("/game/nintendo-64/the-legend-of-zelda-ocarina-of-time");
         /*do {
             games = getGamesFromList(num++);
         } while (games.size() == 100);*/
@@ -36,7 +37,7 @@ public class MetaParser implements Parser {
             URL url = new URL("http://www.metacritic.com/browse/games/score/metascore/all/all?page=" + pageNum);
             URLConnection connection = url.openConnection();
             connection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0; H010818)");
-            String path = "C:/out/" + pageNum + ".html";
+            String path = "./out/" + pageNum + ".html";
             PrintWriter outputFile = new PrintWriter(path);
             InputStream stream = connection.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
@@ -53,7 +54,7 @@ public class MetaParser implements Parser {
             Document document = new DomSerializer(new CleanerProperties()).createDOM(tagNode);
             XPathFactory xPathFactory = XPathFactory.newInstance();
             XPath xPath = xPathFactory.newXPath();
-            XPathExpression expression = xPath.compile("//div[@class='product_item product_title']//a//@href");
+            XPathExpression expression = xPath.compile("//div[@class='product_item product_title']/a/@href");
             NodeList nodeList = (NodeList) expression.evaluate(document, XPathConstants.NODESET);
 
             LinkedList<String> result = new LinkedList<>();
@@ -61,7 +62,7 @@ public class MetaParser implements Parser {
                 result.add(nodeList.item(i).getTextContent());
                 System.out.println(nodeList.item(i).getTextContent());
             }
-            //file.deleteOnExit();
+            file.deleteOnExit();
             return result;
         } catch (ParserConfigurationException | IOException | XPathExpressionException ex) {
             ex.printStackTrace();
@@ -74,7 +75,7 @@ public class MetaParser implements Parser {
             URL url = new URL("http://www.metacritic.com" + gameUrl + "/details");
             URLConnection connection = url.openConnection();
             connection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0; H010818)");
-            String path = "C:/out/" + gameUrl.substring(gameUrl.lastIndexOf("/") + 1) + ".html";
+            String path = "./out/" + gameUrl.substring(gameUrl.lastIndexOf("/") + 1) + ".html";
             PrintWriter outputFile = new PrintWriter(path);
             InputStream stream = connection.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
@@ -91,8 +92,21 @@ public class MetaParser implements Parser {
             Document document = new DomSerializer(new CleanerProperties()).createDOM(tagNode);
             XPathFactory xPathFactory = XPathFactory.newInstance();
             XPath xPath = xPathFactory.newXPath();
-            XPathExpression expression = xPath.compile("//div");
+            XPathExpression expression = xPath.compile("//h1/a [@href='" + gameUrl + "']|" +
+                    "//span[@class='platform']|" +
+                    "//li[@class='summary_detail release_data']/span [@class='data']|" +
+                    "//span[@itemprop='ratingValue']|" +
+                    "//a [@href='" + gameUrl + "/critic-reviews']/span|" +
+                    "//div [@class='metascore_w user large game positive']|" +
+                    "//span[@class='count']/a [@href='" + gameUrl + "/user-reviews']|" +
+                    "//div [@class='summary_detail product_summary']/span [@class='data']|" +
+                    "//div [@class='product_details']/table/tbody/tr/td");
             NodeList nodeList = (NodeList) expression.evaluate(document, XPathConstants.NODESET);
+
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                System.out.println(nodeList.item(i).getTextContent());
+            }
+            file.deleteOnExit();
 
         } catch (ParserConfigurationException | IOException | XPathExpressionException ex) {
             ex.printStackTrace();
