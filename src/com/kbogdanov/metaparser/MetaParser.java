@@ -13,8 +13,11 @@ import javax.xml.xpath.*;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Author: Kirill Bogdanov
@@ -22,10 +25,11 @@ import java.util.List;
  */
 public class MetaParser implements Parser {
     public void parse() {
-        int num = 0;
-        //List<String> games;
-        //games = getGamesFromList(0);
-        getGameInfo("/game/nintendo-64/the-legend-of-zelda-ocarina-of-time");
+        //int num = 0;
+        List<String> games = getGamesFromList(0);
+        for (String game: games) {
+            getGameInfo(game);
+        }
         /*do {
             games = getGamesFromList(num++);
         } while (games.size() == 100);*/
@@ -97,15 +101,55 @@ public class MetaParser implements Parser {
                     "//li[@class='summary_detail release_data']/span [@class='data']|" +
                     "//span[@itemprop='ratingValue']|" +
                     "//a [@href='" + gameUrl + "/critic-reviews']/span|" +
-                    "//div [@class='metascore_w user large game positive']|" +
+                    "//a [@class='metascore_anchor' and @href='" + gameUrl + "/user-reviews']/div|" +
                     "//span[@class='count']/a [@href='" + gameUrl + "/user-reviews']|" +
                     "//div [@class='summary_detail product_summary']/span [@class='data']|" +
-                    "//div [@class='product_details']/table/tbody/tr/td");
+                    "//div [@class='product_details']/table/tbody/tr");
             NodeList nodeList = (NodeList) expression.evaluate(document, XPathConstants.NODESET);
 
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                System.out.println(nodeList.item(i).getTextContent());
+            Game game = new Game();
+            game.setTitle(nodeList.item(0).getTextContent().trim());
+            game.setPlatform(nodeList.item(1).getTextContent().trim());
+
+            try {
+                game.setRelease(new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).parse(nodeList.item(2).getTextContent().trim()));
+            } catch (ParseException ex) {
+                ex.printStackTrace();
             }
+
+            game.setCriticScore(Integer.parseInt(nodeList.item(3).getTextContent().trim()));
+            game.setCriticNumber(Integer.parseInt(nodeList.item(4).getTextContent().trim()));
+            game.setUserScore(Float.parseFloat(nodeList.item(5).getTextContent().trim()));
+            game.setUserNumber(Integer.parseInt(nodeList.item(6).getTextContent().trim().split(" ")[0]));
+            game.setSummary(nodeList.item(7).getTextContent().trim());
+
+            for (int i = 8; i < nodeList.getLength(); i++) {
+                String nodeText = nodeList.item(i).getTextContent().trim();
+                String title = nodeText.substring(0, nodeText.indexOf(":"));
+                String data = nodeText.substring(title.length() + 1).trim();
+                switch (title) {
+                    case "Rating":
+                        game.setRating(data);
+                        break;
+                    case "Official Site":
+                        game.setSite(data);
+                        break;
+                    case "Developer":
+                        game.setDeveloper(data);
+                        break;
+                    case "Genre(s)":
+                        game.setGenre(data);
+                        break;
+                    case "Number of Players":
+                        game.setPlayerNumber(data);
+                        break;
+                    case "ESRB Descriptors":
+                        game.setESRBDescription(data);
+                        break;
+                    default:
+                }
+            }
+            System.out.println(game);
             file.deleteOnExit();
 
         } catch (ParserConfigurationException | IOException | XPathExpressionException ex) {
