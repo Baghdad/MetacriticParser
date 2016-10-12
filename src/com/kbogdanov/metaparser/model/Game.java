@@ -1,14 +1,27 @@
-package com.kbogdanov.metaparser;
+package com.kbogdanov.metaparser.model;
 
+import com.sun.istack.internal.NotNull;
+
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.Date;
+import java.util.Set;
 
 /**
  * Author: Kirill Bogdanov
  * Created on 28.09.2016.
  */
-public class Game {
+
+@Entity
+@Table(name = "games")
+public class Game extends ManagedEntity {
+    @NotNull
     private String title;
-    private String platform;
+
+    @NotNull
+    @OneToMany(mappedBy = "platform")
+    private Set<Platform> platform;
     private Date release;
     private int criticScore;
     private int criticNumber;
@@ -50,11 +63,11 @@ public class Game {
         this.title = title;
     }
 
-    public String getPlatform() {
+    public Set<Platform> getPlatform() {
         return platform;
     }
 
-    public void setPlatform(String platform) {
+    public void setPlatform(Set<Platform> platform) {
         this.platform = platform;
     }
 

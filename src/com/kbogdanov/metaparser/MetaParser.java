@@ -1,5 +1,7 @@
 package com.kbogdanov.metaparser;
 
+import com.kbogdanov.metaparser.model.Game;
+import com.kbogdanov.metaparser.model.Platform;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.DomSerializer;
 import org.htmlcleaner.HtmlCleaner;
@@ -15,6 +17,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -109,7 +112,11 @@ public class MetaParser implements Parser {
 
             Game game = new Game();
             game.setTitle(nodeList.item(0).getTextContent().trim());
-            game.setPlatform(nodeList.item(1).getTextContent().trim());
+            HashSet<Platform> platforms = new HashSet<>();
+            Platform platform = new Platform();
+            platform.setName(nodeList.item(1).getTextContent().trim());
+            platforms.add(platform);
+            game.setPlatform(platforms);
 
             try {
                 game.setRelease(new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).parse(nodeList.item(2).getTextContent().trim()));
