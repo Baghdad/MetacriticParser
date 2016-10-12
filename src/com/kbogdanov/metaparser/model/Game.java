@@ -1,6 +1,10 @@
 package com.kbogdanov.metaparser.model;
 
+
+
+
 import com.sun.istack.internal.NotNull;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
@@ -16,7 +20,7 @@ import java.util.Set;
 @Entity
 @Table(name = "games")
 public class Game extends ManagedEntity {
-    @NotNull
+    @Length(max = 50)
     private String title;
 
     @NotNull

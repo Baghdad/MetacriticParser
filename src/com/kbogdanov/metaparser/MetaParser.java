@@ -6,7 +6,6 @@ import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.DomSerializer;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
-import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
@@ -38,7 +37,6 @@ public class MetaParser implements Parser {
         } while (games.size() == 100);*/
     }
 
-    @Nullable
     private List<String> getGamesFromList(int pageNum) {
         try {
             URL url = new URL("http://www.metacritic.com/browse/games/score/metascore/all/all?page=" + pageNum);
